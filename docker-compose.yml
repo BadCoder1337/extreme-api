@@ -19,5 +19,29 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
+  # GUI fo DB, only for development
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    restart: on-failure
+    ports:
+      - "5050:80"
+    healthcheck:
+      test: [ "CMD", "wget", "-O", "-", "http://localhost:80/misc/ping" ]
+      interval: 10s
+      timeout: 10s
+      start_period: 160s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "user@domain.com"
+      PGADMIN_DEFAULT_PASSWORD: "postgres"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
 volumes:
     postgres_data:
+    pgadmin_data:
