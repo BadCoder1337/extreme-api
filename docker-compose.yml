@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  # Database Service
+  db:
+    build: ./postgres
+    # restart the container in case of an emergency shutdown
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 15s
+      timeout: 15s
+      retries: 20
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+    postgres_data:
