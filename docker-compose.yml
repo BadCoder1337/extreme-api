@@ -71,6 +71,24 @@ services:
       nginx:
         condition: service_healthy
 
+  # Message broker
+  rabbitmq:
+    build: ./rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+    depends_on:
+      pgadmin:
+        condition: service_healthy
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
     postgres_data:
     pgadmin_data:
+    rabbitmq_data:
