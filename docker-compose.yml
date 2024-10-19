@@ -42,6 +42,21 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  # Gateway
+  nginx:
+    build: ./nginx
+    restart: on-failure
+    ports:
+      - "80:80"
+    healthcheck:
+      test: service nginx status || exit 1
+      interval: 15s
+      timeout: 15s
+      retries: 20
+    depends_on:
+      pgadmin:
+        condition: service_healthy
+
 volumes:
     postgres_data:
     pgadmin_data:
