@@ -1,5 +1,20 @@
 version: '3.8'
 services:
+  # Authentication and authorization microservice
+  auth_service:
+    build: ./backend/authorization_service
+    # restart the container in case of an emergency shutdown
+    restart: on-failure
+    healthcheck:
+      test: curl --fail http://localhost:8001/_health || exit 1
+      interval: 20s
+      timeout: 15s
+      retries: 3
+    ports:
+      - "8000:8001"
+    volumes:
+      - ./auth_service:/usr/src/backend/authorization_service
+
   # Database Service
   db:
     build: ./postgres
@@ -54,6 +69,8 @@ services:
       timeout: 15s
       retries: 20
     depends_on:
+      auth_service:
+        condition: service_healthy
       pgadmin:
         condition: service_healthy
 
@@ -92,3 +109,4 @@ volumes:
     postgres_data:
     pgadmin_data:
     rabbitmq_data:
+    auth_service:
