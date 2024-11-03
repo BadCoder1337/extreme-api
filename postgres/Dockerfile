@@ -1,5 +1,5 @@
 # dump build stage
-FROM postgres:11-alpine as dumper
+FROM postgres:11-alpine AS dumper
 
 # Author
 LABEL authors="AD-158"
