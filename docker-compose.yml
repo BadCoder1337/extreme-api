@@ -14,6 +14,8 @@ services:
       - "8000:8001"
     volumes:
       - ./auth_service:/usr/src/backend/authorization_service
+    networks:
+      - backend
 
   # Database Service
   db:
@@ -30,9 +32,11 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=db1
+      - POSTGRES_DB=auth_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - backend
 
   # GUI fo DB, only for development
   pgadmin:
@@ -56,6 +60,8 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - backend
 
   # Gateway
   nginx:
@@ -73,6 +79,8 @@ services:
         condition: service_healthy
       pgadmin:
         condition: service_healthy
+    networks:
+      - backend
 
   # Fast DB
   redis:
@@ -87,6 +95,8 @@ services:
     depends_on:
       nginx:
         condition: service_healthy
+    networks:
+      - backend
 
   # Message broker
   rabbitmq:
@@ -104,6 +114,12 @@ services:
         condition: service_healthy
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
 
 volumes:
     postgres_data:
