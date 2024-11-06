@@ -1,0 +1,94 @@
+version: '3.8'
+services:
+  # Database Service
+  db:
+    build: ./postgres
+    # restart the container in case of an emergency shutdown
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 15s
+      timeout: 15s
+      retries: 20
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  # GUI fo DB, only for development
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    restart: on-failure
+    ports:
+      - "5050:80"
+    healthcheck:
+      test: [ "CMD", "wget", "-O", "-", "http://localhost:80/misc/ping" ]
+      interval: 10s
+      timeout: 10s
+      start_period: 160s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "user@domain.com"
+      PGADMIN_DEFAULT_PASSWORD: "postgres"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # Gateway
+  nginx:
+    build: ./nginx
+    restart: on-failure
+    ports:
+      - "80:80"
+    healthcheck:
+      test: service nginx status || exit 1
+      interval: 15s
+      timeout: 15s
+      retries: 20
+    depends_on:
+      pgadmin:
+        condition: service_healthy
+
+  # Fast DB
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli", "ping" ]
+      interval: 15s
+      timeout: 15s
+      retries: 20
+    depends_on:
+      nginx:
+        condition: service_healthy
+
+  # Message broker
+  rabbitmq:
+    build: ./rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+    depends_on:
+      pgadmin:
+        condition: service_healthy
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+    postgres_data:
+    pgadmin_data:
+    rabbitmq_data:
