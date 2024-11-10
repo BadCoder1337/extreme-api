@@ -44,12 +44,12 @@ def encrypt_jwt(encoded_jwt: bytes, should_use_aes: Optional[bool] = False) -> s
 
 
 # Generate a random AES key for symmetric encryption
-def generate_aes_key(length=32):
+def generate_aes_key(length=32) -> bytes:
     return os.urandom(length)
 
 
 # Encrypt data using AES
-def aes_encrypt(data, aes_key):
+def aes_encrypt(data, aes_key) -> bytes:
     iv = os.urandom(16)  # Initialization vector for AES
     cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv), backend=default_backend())
     encryptor = cipher.encryptor()
@@ -58,7 +58,7 @@ def aes_encrypt(data, aes_key):
 
 
 # Encrypt the AES key using RSA
-def rsa_encrypt_key(aes_key, a_key):
+def rsa_encrypt_key(aes_key, a_key) -> bytes:
     encrypted_key = a_key.encrypt(
         aes_key,
         padding.OAEP(

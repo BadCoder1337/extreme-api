@@ -47,7 +47,7 @@ def decrypt_jwt(token: str, should_use_aes: Optional[bool] = False) -> str:
 
 
 # Decrypt the AES key using RSA
-def rsa_decrypt_key(encrypted_aes_key, private_key):
+def rsa_decrypt_key(encrypted_aes_key, private_key) -> bytes:
     decrypted_key = private_key.decrypt(
         encrypted_aes_key,
         padding.OAEP(
@@ -60,7 +60,7 @@ def rsa_decrypt_key(encrypted_aes_key, private_key):
 
 
 # Decrypt data using AES
-def aes_decrypt(encrypted_data, aes_key):
+def aes_decrypt(encrypted_data, aes_key) -> str:
     iv = encrypted_data[:16]  # Extract the IV
     ciphertext = encrypted_data[16:]  # Extract the ciphertext
     cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv), backend=default_backend())
