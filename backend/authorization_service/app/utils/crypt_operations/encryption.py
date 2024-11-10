@@ -49,7 +49,7 @@ def generate_aes_key(length=32) -> bytes:
 
 
 # Encrypt data using AES
-def aes_encrypt(data, aes_key) -> bytes:
+def aes_encrypt(data: bytes, aes_key: bytes) -> bytes:
     iv = os.urandom(16)  # Initialization vector for AES
     cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv), backend=default_backend())
     encryptor = cipher.encryptor()
@@ -58,7 +58,7 @@ def aes_encrypt(data, aes_key) -> bytes:
 
 
 # Encrypt the AES key using RSA
-def rsa_encrypt_key(aes_key, a_key) -> bytes:
+def rsa_encrypt_key(aes_key: bytes, a_key) -> bytes:
     encrypted_key = a_key.encrypt(
         aes_key,
         padding.OAEP(
