@@ -34,5 +34,6 @@ class Config:
         username=os.getenv("POSTGRES_USER", "postgres"),
         password=os.getenv("POSTGRES_PASSWORD", "postgres"),
     )
+    GRACE_PERIOD_SECONDS = os.getenv("GRACE_PERIOD_SECONDS", 10)  # Set a grace period for token expiry checks
 
 config = Config()
