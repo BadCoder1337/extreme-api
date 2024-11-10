@@ -22,7 +22,7 @@ redis_client = redis.StrictRedis.from_url(config.REDIS_URL)
 def blacklist_token(token: str):
     """Adds the token to the Redis blacklist with its expiration time."""
     decrypted_token = decrypt_jwt(token=token, should_use_aes=True)
-    decoded = jwt.decode(decrypted_token, config.PUBLIC_KEY, algorithms=["RS256"])
+    decoded = jwt.decode(jwt=decrypted_token, key=config.PUBLIC_KEY, algorithms=["RS256"])
     expiry = datetime.utcfromtimestamp(decoded["exp"])
     ttl = int((expiry - datetime.utcnow()).total_seconds())
     redis_client.setex(f"blacklist:{token}", ttl, "blacklisted")
