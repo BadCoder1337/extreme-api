@@ -12,6 +12,8 @@ services:
       retries: 3
     ports:
       - "8000:8001"
+      # Port only for development (debug purpose)
+      - "8567:8567"
     volumes:
       - ./auth_service:/usr/src/backend/authorization_service
     networks:
@@ -30,9 +32,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=auth_db
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_DB=$POSTGRES_DATABASE
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     networks:
