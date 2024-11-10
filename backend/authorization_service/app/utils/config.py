@@ -14,10 +14,16 @@ with open(f"{base_path}/private_key.pem", "rb") as f:
         password=None,
         backend=default_backend()
     )
+with open(f"{base_path}/public_key.pem", "rb") as f:
+    public_key = serialization.load_pem_public_key(
+        f.read(),
+        backend=default_backend()
+    )
 
 
 class Config:
     SECRET_KEY = private_key or os.getenv("JWT_SECRET_KEY", "default_secret_key")
+    PUBLIC_KEY = public_key or os.getenv("JWT_PUBLIC_KEY", "default_public_key")
     ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 5))
     REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7))
     REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")

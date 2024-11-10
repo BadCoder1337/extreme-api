@@ -4,18 +4,18 @@ from os import path
 from typing import Optional
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-base_path = path.dirname(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))))
+if __package__ is None or __package__ == '':
+    import sys
 
-# Load RSA key
-with open(f"{base_path}/public_key.pem", "rb") as f:
-    public_key = serialization.load_pem_public_key(
-        f.read(),
-        backend=default_backend()
-    )
+    sys.path.append(path.dirname(path.dirname(path.dirname(path.dirname(path.abspath(__file__))))))
+
+    from backend.authorization_service.app.utils.config import config
+else:
+    from ...utils.config import config
 
 
 def encrypt_jwt(encoded_jwt: bytes, should_use_aes: Optional[bool] = False) -> str:
@@ -28,10 +28,10 @@ def encrypt_jwt(encoded_jwt: bytes, should_use_aes: Optional[bool] = False) -> s
         encrypted_jwt = aes_encrypt(data=encoded_jwt, aes_key=aes_key)
 
         # Encrypt the AES key with RSA
-        encrypted_aes_key = rsa_encrypt_key(aes_key, public_key)
+        encrypted_aes_key = rsa_encrypt_key(aes_key, config.PUBLIC_KEY)
     else:
         # Encrypt the JWT using the public key
-        encrypted_jwt = public_key.encrypt(
+        encrypted_jwt = config.PUBLIC_KEY.encrypt(
             encoded_jwt,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),

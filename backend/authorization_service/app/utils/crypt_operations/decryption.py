@@ -3,19 +3,18 @@ from os import path
 from typing import Optional
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, modes, algorithms
 
-base_path = path.dirname(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))))
+if __package__ is None or __package__ == '':
+    import sys
 
-# Load RSA key
-with open(f"{base_path}/private_key.pem", "rb") as f:
-    private_key = serialization.load_pem_private_key(
-        f.read(),
-        password=None,
-        backend=default_backend()
-    )
+    sys.path.append(path.dirname(path.dirname(path.dirname(path.dirname(path.abspath(__file__))))))
+
+    from backend.authorization_service.app.utils.config import config
+else:
+    from ...utils.config import config
 
 
 def decrypt_jwt(token: str, should_use_aes: Optional[bool] = False) -> str:
@@ -26,7 +25,7 @@ def decrypt_jwt(token: str, should_use_aes: Optional[bool] = False) -> str:
         encrypted_token = token_bytes[256:]
 
         # Decrypt the AES key
-        aes_key = rsa_decrypt_key(encrypted_aes_key, private_key)
+        aes_key = rsa_decrypt_key(encrypted_aes_key, config.SECRET_KEY)
 
         # Decrypt the JWT
         decrypted_token = aes_decrypt(encrypted_token, aes_key)
@@ -34,7 +33,7 @@ def decrypt_jwt(token: str, should_use_aes: Optional[bool] = False) -> str:
         # Decode the Base64-encoded token
         encrypted_token = base64.urlsafe_b64decode(token)
         # Decrypt the token using the private key
-        decrypted_token = private_key.decrypt(
+        decrypted_token = config.SECRET_KEY.decrypt(
             encrypted_token,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
