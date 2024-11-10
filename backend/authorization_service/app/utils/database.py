@@ -7,9 +7,9 @@ if __package__ is None or __package__ == '':
 
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
-    from backend.authorization_service.app.config import config
+    from backend.authorization_service.app.utils.config import config
 else:
-    from ..config import config
+    from .config import config
 
 # SQLAlchemy database URL
 DATABASE_URL = config.DATABASE_URL
