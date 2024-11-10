@@ -17,6 +17,7 @@ if "main" in  __name__:
 
 app = FastAPI()
 
+
 @app.post("/logout")
 async def logout(request: Request):
     """
@@ -30,7 +31,7 @@ async def logout(request: Request):
     """
     try:
         blacklist_token(request.cookies.get('refresh_token', None))
-        return Response(content={"message": "Successfully logged out."}, status_code=status.HTTP_200_OK)
+        return Response(content=str({"message": "Successfully logged out."}), status_code=status.HTTP_200_OK)
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -42,4 +43,4 @@ def health_check():
     Returns:
         Ok, if server is up and healthy.
     """
-    return Response(content={"message": "Healthy"}, status_code=status.HTTP_200_OK)
+    return Response(content=str({"message": "Healthy"}), status_code=status.HTTP_200_OK)
