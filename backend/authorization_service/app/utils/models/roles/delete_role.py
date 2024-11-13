@@ -18,7 +18,7 @@ else:
 router = APIRouter()
 
 
-@router.delete("/delete/")
+@router.delete("/delete")
 async def delete_role(data = Body(), db: Session = Depends(get_db)):
     """
     Endpoint for deleting a role
