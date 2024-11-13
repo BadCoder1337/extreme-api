@@ -20,6 +20,15 @@ router = APIRouter()
 
 @router.delete("/delete/")
 async def delete_user(data = Body(), db: Session = Depends(get_db)):
+    """
+    Endpoint for deleting a user
+    Args:
+        data: User`s data;
+        db: Database object.
+
+    Returns:
+        Ok, if successful, and error, if not.
+    """
     try:
         user = db.query(User).filter(User.username == data["username"]).first()
         if not user:

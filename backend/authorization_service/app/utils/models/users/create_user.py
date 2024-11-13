@@ -22,6 +22,15 @@ router = APIRouter()
 # Create a user
 @router.post("/create")
 async def create_user(data = Body(), db: Session = Depends(get_db)):
+    """
+    Endpoint for creating a new user.
+    Args:
+        data: User`s data;
+        db: Database object.
+
+    Returns:
+        Created, if successful, and error, if not.
+    """
     try:
         hashed_password = hash_password(data["password"])
         verify_password(data["password"], hashed_password)
