@@ -18,7 +18,7 @@ router = APIRouter()
 
 
 # Create a user
-@router.post("/update")
+@router.put("/update")
 async def update_role(data = Body(), db: Session = Depends(get_db)):
     """
     Endpoint for updating a new role.
