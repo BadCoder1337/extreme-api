@@ -23,6 +23,7 @@ if __package__ is None or __package__ == '':
     from backend.authorization_service.app.utils.models.schemes import UserBaseSchema
     from backend.authorization_service.app.utils.models.users.utils import verify_password
     from backend.authorization_service.app.utils.models.users.create_user import router as create_user_router
+    from backend.authorization_service.app.utils.models.users.update_user import router as update_user_router
     from backend.authorization_service.app.utils.models.users.delete_user import router as delete_user_router
 else:
     from .utils.database import get_db
@@ -35,10 +36,12 @@ else:
     from .utils.models.schemes import UserBaseSchema
     from .utils.models.users.utils import verify_password
     from .utils.models.users.create_user import router as create_user_router
+    from .utils.models.users.update_user import router as update_user_router
     from .utils.models.users.delete_user import router as delete_user_router
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 app.include_router(create_user_router, prefix="/users", tags=["Users"])
+app.include_router(update_user_router, prefix="/users", tags=["Users"])
 app.include_router(delete_user_router, prefix="/users", tags=["Users"])
 
 
