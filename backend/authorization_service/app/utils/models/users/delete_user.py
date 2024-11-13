@@ -20,9 +20,12 @@ router = APIRouter()
 
 @router.delete("/delete/")
 async def delete_user(data = Body(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == data["username"]).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    db.delete(user)
-    db.commit()
-    return Response(content=str(f"User {user.username} was deleted"), status_code=status.HTTP_200_OK)
+    try:
+        user = db.query(User).filter(User.username == data["username"]).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        db.delete(user)
+        db.commit()
+        return Response(content=str(f"User {user.username} was deleted"), status_code=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(content=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
