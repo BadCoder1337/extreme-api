@@ -37,5 +37,7 @@ class Role(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, nullable=False)
+    UniqueConstraint("name", name="uq_role_name")
+    PrimaryKeyConstraint("id", name="pk_role_id")
 
     users = relationship("User", secondary=user_roles, back_populates="roles")

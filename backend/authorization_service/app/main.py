@@ -25,6 +25,9 @@ if __package__ is None or __package__ == '':
     from backend.authorization_service.app.utils.models.users.create_user import router as create_user_router
     from backend.authorization_service.app.utils.models.users.update_user import router as update_user_router
     from backend.authorization_service.app.utils.models.users.delete_user import router as delete_user_router
+    from backend.authorization_service.app.utils.models.roles.create_role import router as create_role_router
+    from backend.authorization_service.app.utils.models.roles.update_role import router as update_role_router
+    from backend.authorization_service.app.utils.models.roles.delete_role import router as delete_role_router
 else:
     from .utils.database import get_db
     from .utils.models import models
@@ -38,11 +41,17 @@ else:
     from .utils.models.users.create_user import router as create_user_router
     from .utils.models.users.update_user import router as update_user_router
     from .utils.models.users.delete_user import router as delete_user_router
+    from .utils.models.roles.create_role import router as create_role_router
+    from .utils.models.roles.update_role import router as update_role_router
+    from .utils.models.roles.delete_role import router as delete_role_router
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 app.include_router(create_user_router, prefix="/users", tags=["Users"])
 app.include_router(update_user_router, prefix="/users", tags=["Users"])
 app.include_router(delete_user_router, prefix="/users", tags=["Users"])
+app.include_router(create_role_router, prefix="/roles", tags=["Roles"])
+app.include_router(update_role_router, prefix="/roles", tags=["Roles"])
+app.include_router(delete_role_router, prefix="/roles", tags=["Roles"])
 
 
 @app.post("/login")
