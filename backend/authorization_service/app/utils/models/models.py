@@ -27,6 +27,7 @@ class User(Base):
     roles = relationship("Role", secondary=user_roles, back_populates="users")
 
     UniqueConstraint("email", name="uq_user_email")
+    UniqueConstraint("username", name="uq_user_username")
 
     PrimaryKeyConstraint("id", name="pk_user_id")
 

@@ -21,8 +21,9 @@ if __package__ is None or __package__ == '':
     from backend.authorization_service.app.utils.token_operations.blacklist_token import blacklist_token
     from backend.authorization_service.app.utils.rate_limit_check import rate_limit_check
     from backend.authorization_service.app.utils.models.schemes import UserBaseSchema
-    from backend.authorization_service.app.utils.models.users.create import hash_password
     from backend.authorization_service.app.utils.models.users.utils import verify_password
+    from backend.authorization_service.app.utils.models.users.create_user import router as create_user_router
+    from backend.authorization_service.app.utils.models.users.delete_user import router as delete_user_router
 else:
     from .utils.database import get_db
     from .utils.models import models
@@ -32,10 +33,13 @@ else:
     from .utils.token_operations.blacklist_token import blacklist_token
     from .utils.rate_limit_check import rate_limit_check
     from .utils.models.schemes import UserBaseSchema
-    from .utils.models.users.create import hash_password
     from .utils.models.users.utils import verify_password
+    from .utils.models.users.create_user import router as create_user_router
+    from .utils.models.users.delete_user import router as delete_user_router
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+app.include_router(create_user_router, prefix="/users", tags=["Users"])
+app.include_router(delete_user_router, prefix="/users", tags=["Users"])
 
 
 @app.post("/login")
@@ -53,12 +57,15 @@ async def login(response: Response, request: Request, user: UserBaseSchema, db: 
         Response object with tokens, if successful, and Error if not.
     """
     username = user.username
-    db_user = db.query(models.User).filter(models.User.username == username).first()
+    db_user = db.query(models.User).filter(models.User.username == username).first()\
 
-    is_valid = verify_password(plain_password=hash_password(user.password),
+    if not db_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
+
+    is_valid = verify_password(plain_password=user.password,
                                hashed_password=db_user.password_hash)
 
-    if not db_user or not is_valid:
+    if not is_valid:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
     if not rate_limit_check(user.username, "login", limit=5, period=300):
