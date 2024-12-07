@@ -69,7 +69,7 @@ async def login(response: Response, request: Request, user: UserBaseSchema, db: 
         Response object with tokens, if successful, and Error if not.
     """
     username = user.username
-    db_user = db.query(models.User).filter(models.User.username == username).first()\
+    db_user = db.query(models.User).filter(models.User.username == username).first()
 
     if not db_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
