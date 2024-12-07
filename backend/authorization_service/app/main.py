@@ -1,3 +1,5 @@
+import json
+
 import jwt
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi import Request
@@ -5,6 +7,7 @@ from fastapi import Response
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from starlette import status
+from fastapi.middleware.cors import CORSMiddleware
 
 if __package__ is None or __package__ == '':
     import sys
@@ -53,15 +56,22 @@ app.include_router(create_role_router, prefix="/roles", tags=["Roles"])
 app.include_router(update_role_router, prefix="/roles", tags=["Roles"])
 app.include_router(delete_role_router, prefix="/roles", tags=["Roles"])
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
-@app.post("/login")
-async def login(response: Response, request: Request, user: UserBaseSchema, db: Session = Depends(get_db)):
+
+@app.post("/auth/login")
+async def login(request: Request, user: UserBaseSchema, db: Session = Depends(get_db)):
     """
     Endpoint for logging in.
 
     Args:
         request: request object;
-        response: response object;
         user: authorized user;
         db: working database.
 
@@ -87,13 +97,15 @@ async def login(response: Response, request: Request, user: UserBaseSchema, db: 
     user_agent = request.headers.get('User-Agent', None)
     access_token = create_access_token({"sub": username})
     refresh_token = create_refresh_token({"sub": username}, user_agent=user_agent, ip_address=request.client.host)
-    response.set_cookie(key="access_token", value=access_token, httponly=True)
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+    response_data = json.dumps({"access": access_token, "user": username})
+    response = Response(content=response_data)
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="none")
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="none")
     response.status_code = status.HTTP_200_OK
     return response
 
 
-@app.post("/refresh")
+@app.post("/auth/refresh")
 async def refresh_token(request: Request, response: Response):
     """
     Endpoint for token refresh.
@@ -116,15 +128,17 @@ async def refresh_token(request: Request, response: Response):
                                                  user_agent=request.headers.get('User-Agent', None),
                                                  ip_address=request.client.host
                                                  )
-        response.set_cookie(key="access_token", value=new_access_token, httponly=True)
-        response.set_cookie(key="refresh_token", value=new_refresh_token, httponly=True)
+        response_data = json.dumps({"access": access_token})
+        response = Response(content=response_data)
+        response.set_cookie(key="access_token", value=new_access_token, httponly=True, secure=True, samesite="none")
+        response.set_cookie(key="refresh_token", value=new_refresh_token, httponly=True, secure=True, samesite="none")
         response.status_code = status.HTTP_200_OK
         return response
     except jwt.InvalidTokenError as e:
         raise HTTPException(status_code=401, detail=str(e))
 
 
-@app.post("/logout")
+@app.post("/auth/logout")
 async def logout(request: Request):
     """
     Endpoint for logging out.
@@ -137,12 +151,13 @@ async def logout(request: Request):
     """
     try:
         blacklist_token(request.cookies.get('refresh_token', None))
-        return Response(content=str({"message": "Successfully logged out."}), status_code=status.HTTP_200_OK)
+        response_data = json.dumps({"message": "Successfully logged out."})
+        return Response(content=response_data, status_code=status.HTTP_200_OK)
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@app.get("/_health")
+@app.get("/auth/_health")
 def health_check():
     """
     Endpoint for docker-compose healthcheck call.
