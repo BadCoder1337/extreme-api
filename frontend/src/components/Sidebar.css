@@ -1,0 +1,25 @@
+.nav_icon {
+    margin-left: 2rem;
+    font-size: 2rem;
+    height: 80px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.sidebar_nav {
+    /*background: #15171c;*/
+    background: #212529;
+    width: 250px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    transition: 350ms;
+    z-index: 10;
+}
+
+.sidebar_wrap {
+    width: 100%;
+}
