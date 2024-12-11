@@ -6,7 +6,7 @@ services:
     # restart the container in case of an emergency shutdown
     restart: on-failure
     healthcheck:
-      test: curl --fail http://localhost:8001/_health || exit 1
+      test: curl --fail http://localhost:8001/auth/_health || exit 1
       interval: 20s
       timeout: 15s
       retries: 3
@@ -16,6 +16,18 @@ services:
       - "8567:8567"
     volumes:
       - ./auth_service:/usr/src/backend/authorization_service
+    networks:
+      - backend
+    
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/public/:/usr/src/app/public/
+      - ./frontend/src/:/usr/src/app/src/
+    command: npm start
     networks:
       - backend
 
